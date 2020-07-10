@@ -93,3 +93,4 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         return configProperties;
     }
 }
+

@@ -27,7 +27,7 @@
     <groupId>org.wso2.carbon.identity.outbound.auth.kakao</groupId>
     <artifactId>identity-outbound-oauth-kakao</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>components/org.wso2.carbon.identity.application.authenticator.kakao</module>
     </modules>
@@ -184,7 +184,7 @@
         </plugins>
     </build>
     <properties>
-        <oauth2.outbound.version>1.0-SNAPSHOT</oauth2.outbound.version>
+        <oauth2.outbound.version>1.0.0-SNAPSHOT</oauth2.outbound.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <oltu.version>1.0.0.wso2v3</oltu.version>
         <carbon.identity.framework.version>5.17.5</carbon.identity.framework.version>
@@ -204,3 +204,4 @@
         <json.version.range>[3.0,4)</json.version.range>
     </properties>
 </project>
+

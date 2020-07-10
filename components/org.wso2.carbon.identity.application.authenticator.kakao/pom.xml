@@ -21,7 +21,7 @@
     <parent>
         <artifactId>identity-outbound-oauth-kakao</artifactId>
         <groupId>org.wso2.carbon.identity.outbound.auth.kakao</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -109,12 +109,11 @@
             <artifactId>identity-outbound-oauth-oauth2</artifactId>
             <scope>system</scope>
             <systemPath>
-                ${project.basedir}/src/main/resources/org.wso2.carbon.identity.application.authenticator.oauth2-1.0-SNAPSHOT.jar
+                ${project.basedir}/src/main/resources/org.wso2.carbon.identity.application.authenticator.oauth2-1.0.0-SNAPSHOT.jar
             </systemPath>
             <version>${oauth2.outbound.version}</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -167,3 +166,4 @@
         </plugins>
     </build>
 </project>
+
