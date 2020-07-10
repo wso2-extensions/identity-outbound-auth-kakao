@@ -25,4 +25,3 @@ public class KakaoCustomAuthenticatorConstants {
     public static final String CLIENT_SECRET = "ClientSecret";
     public static final String CALLBACK_URL = "CallbackUrl";
 }
-

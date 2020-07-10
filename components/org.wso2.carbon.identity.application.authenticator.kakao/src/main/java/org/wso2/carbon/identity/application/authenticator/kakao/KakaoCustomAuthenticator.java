@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/***
+ * Kakao Custom Authenticator is an outbound authenticator implementation for social login provider named Kakao
+ * This extends Oauth Generic Authenticator implementation
+ */
 public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
 
     private static final long serialVersionUID = 6614257960044886319L;
