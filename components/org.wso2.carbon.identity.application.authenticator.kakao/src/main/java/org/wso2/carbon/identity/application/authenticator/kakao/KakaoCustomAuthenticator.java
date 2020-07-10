@@ -19,7 +19,10 @@
 package org.wso2.carbon.identity.application.authenticator.kakao;
 
 import org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticator;
+import org.wso2.carbon.identity.application.common.model.Property;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
@@ -56,4 +59,33 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         return "https://kapi.kakao.com/v2/user/me";
     }
 
+    @Override
+    public List<Property> getConfigurationProperties() {
+
+        List<Property> configProperties = new ArrayList<>();
+
+        Property clientId = new Property();
+        clientId.setName(KakaoCustomAuthenticatorConstants.CLIENT_ID);
+        clientId.setDisplayName("Client Id");
+        clientId.setRequired(true);
+        clientId.setDescription("Enter client identifier value");
+        configProperties.add(clientId);
+
+        Property clientSecret = new Property();
+        clientSecret.setName(KakaoCustomAuthenticatorConstants.CLIENT_SECRET);
+        clientSecret.setDisplayName("Client Secret");
+        clientSecret.setRequired(true);
+        clientSecret.setConfidential(true);
+        clientSecret.setDescription("Enter client secret value");
+        configProperties.add(clientSecret);
+
+        Property callbackUrl = new Property();
+        callbackUrl.setName(KakaoCustomAuthenticatorConstants.CALLBACK_URL);
+        callbackUrl.setDisplayName("Callback Url");
+        callbackUrl.setRequired(true);
+        callbackUrl.setDescription("Enter callback url");
+        configProperties.add(callbackUrl);
+
+        return configProperties;
+    }
 }
