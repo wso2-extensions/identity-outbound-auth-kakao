@@ -36,7 +36,7 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
     @Override
     public String getFriendlyName() {
 
-        return "KAKAO";
+        return KakaoCustomAuthenticatorConstants.AUTHENTICATOR_FRIENDLY_NAME;
     }
 
     @Override
@@ -48,19 +48,19 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
     @Override
     protected String getTokenEndpoint(Map<String, String> authenticatorProperties) {
 
-        return "https://kauth.kakao.com/oauth/token";
+        return KakaoCustomAuthenticatorConstants.KAKAO_TOKEN_URL;
     }
 
     @Override
     protected String getAuthorizationServerEndpoint(Map<String, String> authenticatorProperties) {
 
-        return "https://kauth.kakao.com/oauth/authorize";
+        return KakaoCustomAuthenticatorConstants.KAKAO_AUTH_URL;
     }
 
     @Override
     protected String getUserInfoEndpoint(Map<String, String> authenticatorProperties) {
 
-        return "https://kapi.kakao.com/v2/user/me";
+        return KakaoCustomAuthenticatorConstants.KAKAO_INFO_URL;
     }
 
     @Override

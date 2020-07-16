@@ -21,8 +21,12 @@ package org.wso2.carbon.identity.application.authenticator.kakao;
 public class KakaoCustomAuthenticatorConstants {
 
     public static final String AUTHENTICATOR_NAME = "KAKAO";
+    public static final String AUTHENTICATOR_FRIENDLY_NAME = "KAKAO";
     public static final String CLIENT_ID = "ClientId";
     public static final String CLIENT_SECRET = "ClientSecret";
     public static final String CALLBACK_URL = "CallbackUrl";
+    public static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
+    public static final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
+    public static final String KAKAO_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 }
 
