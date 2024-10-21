@@ -1,4 +1,4 @@
-# Configuring Kakao Authenticator with IS 7.1
+# Configuring Kakao Authenticator with IS 7.1.0
 
 This page provides instructions on how to configure the Kakao
 authenticator and the WSO2 Identity Server using a sample app to
@@ -52,8 +52,8 @@ Follow the steps given below to set this up.
 
 The next step is to deploy the Pickup Dispatch sample web app in order to use it in this scenario.
 
-To configure this, see [saml2-web-app-pickup-dispatch
-webapp](https://is.docs.wso2.com/en/5.9.0/learn/deploying-the-sample-app/#deploying-the-saml2-web-app-pickup-dispatch-webapp).
+To configure this, Download [saml2-web-app-pickup-dispatch
+webapp](https://github.com/wso2/samples-is/releases/download/v4.5.2/saml2-web-app-pickup-dispatch.com.war) and [configure](https://is.docs.wso2.com/en/5.9.0/learn/deploying-the-sample-app/#deploy-the-sample-web-app_1) it using TOMCAT.
 
 ## Step 3 - Configure the Connection
 
