@@ -5,7 +5,7 @@
   "documentationUrl": "https://github.com/wso2-extensions/identity-outbound-auth-kakao/tree/master/docs/README_LATEST.md",
   "description": "The Kakao Authenticator allows you to authenticate a user using Kakao through WSO2 Identity Server.",
   "status": "Active",
-  "labels": [],
+  "labels": ["kakao", "kakao-connector"],
   "releases": [
     {
       "tagName": "v1.0.4",
