@@ -8,7 +8,7 @@ Follow the steps given below to set this up.
 
 * [Step 1 - Configure the Kakao App](#step-1---configure-the-kakao-app)
 * [Step 2 - Deploy the Pickup Dispatch Sample Web App](#step-2---deploy-the-pickup-dispatch-sample-web-app)
-* [Step 3 - Configure the Identity Provider (IdP)](#step-3---configure-the-identity-provider-idp)
+* [Step 3 - Configure the Connection (IdP)](#step-3---Configure--the--Connection)
 * [Step 4 - Configure the Service Provider](#step-4---configure-the-service-provider)
 * [Step 5 - Test the Sample Application](#step-5---test-the-sample-application)
 
@@ -18,7 +18,7 @@ Follow the steps given below to set this up.
    `<IS_HOME>/repository/components/dropins` directory.
    You can download the .jar file
    (``)
-   from the [WSO2 Store](https://store.wso2.com/store/assets/isconnector/).
+   from the [WSO2 Store](https://store.wso2.com/connector/identity-outbound-auth-kakao).
 
 2. Sign up to Kakao using the following URL : `https://accounts.kakao.com/weblogin/create_account/?continue=https%3A%2F%2Faccounts.kakao.com%2Fweblogin%2Faccount&lang=en#selectVerifyMethod`
    (If you are already existing user neglect this step)
@@ -55,7 +55,7 @@ The next step is to deploy the Pickup Dispatch sample web app in order to use it
 To configure this, Download [saml2-web-app-pickup-dispatch
 webapp](https://github.com/wso2/samples-is/releases/download/v4.5.2/saml2-web-app-pickup-dispatch.com.war) and [configure](https://is.docs.wso2.com/en/5.9.0/learn/deploying-the-sample-app/#deploy-the-sample-web-app_1) it using TOMCAT.
 
-## Step 3 - Configure the Connection
+## Step 3 - Configure the Connection (IDP)
 
 Next, add a connection in WSO2 Identity Server.
 
