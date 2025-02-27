@@ -26,13 +26,13 @@
     <groupId>org.wso2.carbon.identity.outbound.auth.kakao</groupId>
     <artifactId>identity-outbound-oauth-kakao</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.8</version>
+    <version>1.0.9-SNAPSHOT</version>
     <url>http://wso2.org</url>
     <scm>
         <url>https://github.com/wso2-extensions/identity-outbound-auth-kakao.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-outbound-auth-kakao.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-outbound-auth-kakao.git</connection>
-        <tag>v1.0.8</tag>
+        <tag>HEAD</tag>
     </scm>
     <modules>
         <module>components/org.wso2.carbon.identity.application.authenticator.kakao</module>
