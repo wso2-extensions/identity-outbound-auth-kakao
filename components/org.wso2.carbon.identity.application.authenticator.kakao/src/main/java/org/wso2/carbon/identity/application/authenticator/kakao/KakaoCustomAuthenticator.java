@@ -179,8 +179,9 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         authenticatorData.setName(getName());
         authenticatorData.setDisplayName(getFriendlyName());
         authenticatorData.setI18nKey(getI18nKey());
-        String idpName = context.getExternalIdP().getIdPName();
-        authenticatorData.setIdp(idpName);
+        if (context.getExternalIdP() != null) {
+            authenticatorData.setIdp(context.getExternalIdP().getIdPName());
+        }
 
         List<String> requiredParameterList = new ArrayList<>();
         if (isTrustedTokenIssuer(context)) {
@@ -282,7 +283,7 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
 
     private boolean isNativeSDKBasedFederationCall(HttpServletRequest request) {
 
-        return request.getParameter(ACCESS_TOKEN_PARAM) != null;
+        return request.getParameter(ACCESS_TOKEN_PARAM) != null && request.getParameter(ID_TOKEN_PARAM) != null;
     }
 
     private AdditionalData getAdditionalData(AuthenticationContext context, boolean isNativeSDKBasedFederationCall) {
