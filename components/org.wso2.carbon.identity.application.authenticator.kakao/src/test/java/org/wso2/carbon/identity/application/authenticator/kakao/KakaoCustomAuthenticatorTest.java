@@ -19,19 +19,12 @@
 
 package org.wso2.carbon.identity.application.authenticator.kakao;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.SignedJWT;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.assertTrue;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.AUTHENTICATOR_I18N_KEY;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.CLIENT_ID;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.KAKAO_AUTH_URL;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.REDIRECT_URL;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.STATE;

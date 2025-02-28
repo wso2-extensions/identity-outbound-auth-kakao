@@ -229,11 +229,11 @@
         <osgi.framework.version.range>[1.8,2)</osgi.framework.version.range>
         <json.version.range>[3.0,4)</json.version.range>
         <nimbusds.osgi.version.range>[7.3.0,8.0.0)</nimbusds.osgi.version.range>
-        <jacoco.version>0.7.9</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <nimbusds.version>7.3.0.wso2v1</nimbusds.version>
         <carbon.identity.package.export.project.version>${project.version}
         </carbon.identity.package.export.project.version>
-        <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
         <mockito.version>5.3.1</mockito.version>
         <mockito-testng.version>0.5.2</mockito-testng.version>
         <sonar.coverage.exclusions>
