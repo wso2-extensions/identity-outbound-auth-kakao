@@ -35,12 +35,9 @@ public class KakaoCustomAuthenticatorConstants {
     public static final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     public static final String KAKAO_INFO_URL = "https://kapi.kakao.com/v2/user/me";
     public static final String KAKAO_OAUTH2_STATE_SUFFIX = ",oauth2";
-    
-    
+
     private KakaoCustomAuthenticatorConstants() {
     }
-
-
 
     public enum ErrorMessages {
 
