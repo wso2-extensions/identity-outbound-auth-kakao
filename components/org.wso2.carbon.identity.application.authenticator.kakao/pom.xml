@@ -41,13 +41,28 @@
             <artifactId>org.wso2.carbon.identity.application.authenticator.oauth2</artifactId>
             <version>${oauth2.outbound.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.outbound.auth.oidc</groupId>
+            <artifactId>org.wso2.carbon.identity.application.authenticator.oidc</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-testng</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -60,6 +75,8 @@
                             org.wso2.carbon.identity.application.authenticator.kakao.internal
                         </Private-Package>
                         <Import-Package>
+                            com.nimbusds.jose.*; version="${nimbusds.osgi.version.range}",
+                            com.nimbusds.jwt; version="${nimbusds.osgi.version.range}",
                             javax.servlet.http;version="${javax.servlet.version.range}",
                             org.apache.commons.lang;version="${apache.commons.version.range}",
                             org.apache.commons.logging;version="${apache.commons.logging.version.range}",
@@ -72,6 +89,8 @@
                             org.osgi.framework;version="${osgi.framework.version.range}",
                             org.osgi.service.component;version="${osgi.service.component.imp.pkg.version.range}",
                             org.wso2.carbon.identity.application.authentication.framework.*;version="${identity.framework.package.import.version.range}",
+                            org.wso2.carbon.identity.application.authenticator.oidc;
+                            version="${identity.outbound.auth.oidc.version.range}",
                             org.wso2.carbon.identity.application.common.model;version="${identity.framework.package.import.version.range}",
                             org.wso2.carbon.identity.core.util;version="${identity.framework.package.import.version.range}"
                         </Import-Package>
@@ -90,9 +109,16 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
                 <configuration>
-                    <sourcepath>src/main/java</sourcepath>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <systemPropertyVariables>
+                        <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+                    </systemPropertyVariables>
+                    <reuseForks>true</reuseForks>
                 </configuration>
             </plugin>
         </plugins>
