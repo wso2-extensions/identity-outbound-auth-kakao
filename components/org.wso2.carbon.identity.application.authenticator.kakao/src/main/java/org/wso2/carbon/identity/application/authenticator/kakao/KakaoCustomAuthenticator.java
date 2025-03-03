@@ -52,19 +52,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.ACCESS_TOKEN_PARAM;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.AUTHENTICATOR_I18N_KEY;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.AUTHENTICATOR_MESSAGE;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.CALLBACK_URL;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.CLIENT_ID;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.CLIENT_SECRET;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.ID_TOKEN_PARAM;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.KAKAO_AUTH_URL;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.KAKAO_OAUTH2_STATE_SUFFIX;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.REDIRECT_URL;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.STATE;
+import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.CALLBACK_URL;
+import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.CLIENT_ID;
+import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.CLIENT_SECRET;
 import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.OAUTH2_GRANT_TYPE_CODE;
 import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.OAUTH2_PARAM_STATE;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.ACCESS_TOKEN_PARAM;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.CLIENT_ID_PARAM;
+import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants.ID_TOKEN_PARAM;
 
 /***
  * Kakao Custom Authenticator is an outbound authenticator implementation for social login provider named Kakao
@@ -74,6 +74,12 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
 
     private static final long serialVersionUID = 6614257960044886319L;
 
+    /**
+     * Check whether the request can be handled by the authenticator.
+     *
+     * @param request The http servlet request
+     * @return true if the request can be handled by the authenticator.
+     */
     @Override
     public boolean canHandle(HttpServletRequest request) {
 
@@ -116,7 +122,7 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         List<Property> configProperties = new ArrayList<>();
 
         Property clientId = new Property();
-        clientId.setName(KakaoCustomAuthenticatorConstants.CLIENT_ID);
+        clientId.setName(CLIENT_ID);
         clientId.setDisplayName("Client Id");
         clientId.setRequired(true);
         clientId.setDescription("Enter client identifier value");
@@ -162,7 +168,6 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         return AUTHENTICATOR_I18N_KEY;
     }
 
-
     /**
      * This method is responsible for obtaining authenticator-specific data needed to
      * initialize the authentication process within the provided authentication context.
@@ -205,10 +210,10 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
                                                  AuthenticationContext context) throws AuthenticationFailedException {
 
         super.initiateAuthenticationRequest(request, response, context);
-        String clientId = context.getAuthenticatorProperties().get(KakaoCustomAuthenticatorConstants.CLIENT_ID);
+        String clientId = context.getAuthenticatorProperties().get(CLIENT_ID);
         String state = context.getContextIdentifier() + KAKAO_OAUTH2_STATE_SUFFIX;
         String redirectUri = context.getAuthenticatorProperties().get(CALLBACK_URL);
-        context.setProperty(STATE, state);
+        context.setProperty(OAUTH2_PARAM_STATE, state);
         StringBuilder redirectUrl = new StringBuilder(KAKAO_AUTH_URL)
                 .append("?response_type=code")
                 .append("&client_id=").append(clientId)
@@ -228,15 +233,7 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
                 token = request.getParameter(ACCESS_TOKEN_PARAM);
                 String idToken = request.getParameter(ID_TOKEN_PARAM);
                 if (StringUtils.isNotBlank(idToken)) {
-                    try {
-                        validateJWTToken(context, idToken);
-                    } catch (Exception e) {
-                        setAuthenticatorMessageToContext(
-                                KakaoCustomAuthenticatorConstants.ErrorMessages.JWT_TOKEN_VALIDATION_FAILED,
-                                context);
-                        throw new AuthenticationFailedException(KakaoCustomAuthenticatorConstants.ErrorMessages.
-                                JWT_TOKEN_VALIDATION_FAILED.getMessage(), e);
-                    }
+                    validateJWTToken(context, idToken);
                 }
             } else {
                 String clientId = authenticatorProperties.get(CLIENT_ID);
@@ -289,50 +286,55 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
     private AdditionalData getAdditionalData(AuthenticationContext context, boolean isNativeSDKBasedFederationCall) {
 
         AdditionalData additionalData = new AdditionalData();
-
+        Map<String, String> additionalAuthenticationParams = new HashMap<>();
         if (isNativeSDKBasedFederationCall) {
-            Map<String, String> additionalAuthenticationParams = new HashMap<>();
-            additionalData.setAdditionalAuthenticationParams(additionalAuthenticationParams);
+            additionalAuthenticationParams.put(CLIENT_ID_PARAM,
+                    context.getAuthenticatorProperties().get(CLIENT_ID));
         } else {
-            Map<String, String> additionalAuthenticationParams = new HashMap<>();
             additionalAuthenticationParams.put(REDIRECT_URL, context.getProperty(REDIRECT_URL).toString());
-            additionalAuthenticationParams.put(STATE, context.getProperty(STATE).toString());
-            additionalData.setAdditionalAuthenticationParams(additionalAuthenticationParams);
+            additionalAuthenticationParams.put(OAUTH2_PARAM_STATE, context.getProperty(OAUTH2_PARAM_STATE).toString());
         }
+        additionalData.setAdditionalAuthenticationParams(additionalAuthenticationParams);
         return additionalData;
     }
 
-    private void validateJWTToken(AuthenticationContext context, String idToken) throws AuthenticationFailedException,
-            IdentityOAuth2Exception, JOSEException, IdentityProviderManagementException, ParseException {
+    private void validateJWTToken(AuthenticationContext context, String idToken) throws AuthenticationFailedException {
 
-        SignedJWT signedJWT = SignedJWT.parse(idToken);
-        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
-        validateAudience(context, claimsSet.getAudience());
-        OIDCTokenValidationUtil.validateIssuerClaim(claimsSet);
-        String tenantDomain = context.getTenantDomain();
-        String idpIdentifier = OIDCTokenValidationUtil.getIssuer(claimsSet);
-        IdentityProvider identityProvider = getIdentityProvider(idpIdentifier, tenantDomain);
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(idToken);
+            JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+            validateAudience(context, claimsSet.getAudience());
+            OIDCTokenValidationUtil.validateIssuerClaim(claimsSet);
+            String tenantDomain = context.getTenantDomain();
+            String idpIdentifier = OIDCTokenValidationUtil.getIssuer(claimsSet);
+            IdentityProvider identityProvider = getIdentityProvider(idpIdentifier, tenantDomain);
 
-        if (identityProvider == null) {
-            String msg =  String.format(
-                KakaoCustomAuthenticatorConstants.ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(), idpIdentifier);
-            AuthenticatorMessage authenticatorMessage = new AuthenticatorMessage(
-                FrameworkConstants.AuthenticatorMessageType.ERROR,
-                KakaoCustomAuthenticatorConstants.ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(),
-                msg,
-                null);
-            setAuthenticatorMessageToContext(authenticatorMessage, context);
-            throw new AuthenticationFailedException(msg);
+            if (identityProvider == null) {
+                String msg = String.format(
+                        KakaoCustomAuthenticatorConstants.ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(), idpIdentifier);
+                AuthenticatorMessage authenticatorMessage = new AuthenticatorMessage(
+                        FrameworkConstants.AuthenticatorMessageType.ERROR,
+                        KakaoCustomAuthenticatorConstants.ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(),
+                        msg,
+                        null);
+                setAuthenticatorMessageToContext(authenticatorMessage, context);
+                throw new AuthenticationFailedException(msg);
+            }
+
+            OIDCTokenValidationUtil.validateSignature(signedJWT, identityProvider);
+        } catch (ParseException | JOSEException | IdentityProviderManagementException | IdentityOAuth2Exception e) {
+            setAuthenticatorMessageToContext(
+                    KakaoCustomAuthenticatorConstants.ErrorMessages.JWT_TOKEN_VALIDATION_FAILED, context);
+            throw new AuthenticationFailedException(KakaoCustomAuthenticatorConstants.ErrorMessages.
+                    JWT_TOKEN_VALIDATION_FAILED.getMessage(), e);
         }
-
-        OIDCTokenValidationUtil.validateSignature(signedJWT, identityProvider);
     }
 
     private void validateAudience(AuthenticationContext context, List<String> audience)
             throws AuthenticationFailedException {
 
         Map<String, String> authenticatorProperties = context.getAuthenticatorProperties();
-        String clientId = authenticatorProperties.get(KakaoCustomAuthenticatorConstants.CLIENT_ID);
+        String clientId = authenticatorProperties.get(CLIENT_ID);
         if (audience == null || !audience.contains(clientId)) {
             setAuthenticatorMessageToContext(KakaoCustomAuthenticatorConstants.ErrorMessages
                     .ID_TOKEN_AUD_VALIDATION_FAILED, context);

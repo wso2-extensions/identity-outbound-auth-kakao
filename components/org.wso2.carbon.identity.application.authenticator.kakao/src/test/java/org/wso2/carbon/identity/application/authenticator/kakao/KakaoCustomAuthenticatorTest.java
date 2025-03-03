@@ -21,19 +21,17 @@ package org.wso2.carbon.identity.application.authenticator.kakao;
 
 import org.mockito.Mockito;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.AUTHENTICATOR_I18N_KEY;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.KAKAO_AUTH_URL;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.REDIRECT_URL;
-import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.STATE;
 import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.OAUTH2_GRANT_TYPE_CODE;
 import static org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants.OAUTH2_PARAM_STATE;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -41,20 +39,22 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatorData;
-import org.wso2.carbon.identity.application.authenticator.oidc.util.OIDCTokenValidationUtil;
+import org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthenticatorConstants;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
-import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
-import org.wso2.carbon.idp.mgt.IdentityProviderManager;
-import org.wso2.carbon.idp.mgt.IdpManager;
 import org.wso2.carbon.idp.mgt.util.IdPManagementConstants;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * Unit test cases for KakaoCustomAuthenticator.
+ */
 public class KakaoCustomAuthenticatorTest {
 
-    final String AUTHENTICATOR_NAME = "KAKAO";
     final String TEST_REDIRECT_URL = "http://testkakaoredirect.com";
     final String TEST_STATE = "test_scope";
     final String TEST_CLIENT_ID = "testClientId";
@@ -73,21 +73,25 @@ public class KakaoCustomAuthenticatorTest {
 
     @Test(dataProvider = "canHandleDataProvider")
     public void testCanHandleNativeSDKBasedFederationCall(String accessToken, String idToken, Boolean expectedResult) {
+
         KakaoCustomAuthenticator authenticator = new KakaoCustomAuthenticator();
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        when(request.getParameter(KakaoCustomAuthenticatorConstants.ACCESS_TOKEN_PARAM)).thenReturn(accessToken);
-        when(request.getParameter(KakaoCustomAuthenticatorConstants.ID_TOKEN_PARAM)).thenReturn(idToken);
+        when(request.getParameter(OIDCAuthenticatorConstants.ACCESS_TOKEN_PARAM)).thenReturn(accessToken);
+        when(request.getParameter(OIDCAuthenticatorConstants.ID_TOKEN_PARAM)).thenReturn(idToken);
         assertEquals(authenticator.canHandle(request), expectedResult, "Can handle is not as expected");
     }
 
     @Test
     public void testGetName() {
+
         KakaoCustomAuthenticator authenticator = new KakaoCustomAuthenticator();
-        assertEquals(authenticator.getName(), AUTHENTICATOR_NAME, "Authenticator name is not as expected");
+        assertEquals(authenticator.getName(), KakaoCustomAuthenticatorConstants.AUTHENTICATOR_NAME,
+                "Authenticator name is not as expected");
     }
 
     @Test
     public void testGetAuthorizationServerEndpoint() {
+
         KakaoCustomAuthenticator authenticator = new KakaoCustomAuthenticator();
         assertEquals(authenticator.getAuthorizationServerEndpoint(null),
                 KakaoCustomAuthenticatorConstants.KAKAO_AUTH_URL, "Authorization server endpoint is not as expected");
@@ -95,6 +99,7 @@ public class KakaoCustomAuthenticatorTest {
 
     @Test
     public void testIsAPIBasedAuthenticationSupported() {
+
         KakaoCustomAuthenticator authenticator = new KakaoCustomAuthenticator();
         assertTrue(authenticator.isAPIBasedAuthenticationSupported(), "API based authentication is not supported");
     }
@@ -123,8 +128,8 @@ public class KakaoCustomAuthenticatorTest {
         Optional<AuthenticatorData> authInitiationData = authenticator.getAuthInitiationData(context);
         assertTrue(authInitiationData.isPresent(), "Auth initiation data is not present");
         assertTrue(authInitiationData.get().getRequiredParams().containsAll(Arrays.asList(
-                KakaoCustomAuthenticatorConstants.ACCESS_TOKEN_PARAM,
-                KakaoCustomAuthenticatorConstants.ID_TOKEN_PARAM)), "Required params are not as expected");
+                OIDCAuthenticatorConstants.ACCESS_TOKEN_PARAM,
+                OIDCAuthenticatorConstants.ID_TOKEN_PARAM)), "Required params are not as expected");
         assertEquals(authInitiationData.get().getPromptType(),
                 FrameworkConstants.AuthenticatorPromptType.INTERNAL_PROMPT, "Prompt type is not as expected");
     }
@@ -165,7 +170,7 @@ public class KakaoCustomAuthenticatorTest {
 
         KakaoCustomAuthenticator authenticator = new KakaoCustomAuthenticator();
         when(context.getProperty(REDIRECT_URL)).thenReturn(TEST_REDIRECT_URL);
-        when(context.getProperty(STATE)).thenReturn(TEST_STATE);
+        when(context.getProperty(OAUTH2_PARAM_STATE)).thenReturn(TEST_STATE);
 
         Optional<AuthenticatorData> authInitiationData = authenticator.getAuthInitiationData(context);
         assertTrue(authInitiationData.isPresent(), "Auth initiation data is not present");
@@ -189,7 +194,7 @@ public class KakaoCustomAuthenticatorTest {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
         context.setProperty(REDIRECT_URL, TEST_REDIRECT_URL);
-        context.setProperty(STATE, TEST_STATE);
+        context.setProperty(OAUTH2_PARAM_STATE, TEST_STATE);
 
         authenticator.initiateAuthenticationRequest(request, response, context);
         StringBuilder partialExpectedRedirectUrlWithoutState = new StringBuilder(KAKAO_AUTH_URL)
@@ -197,8 +202,6 @@ public class KakaoCustomAuthenticatorTest {
                 .append("&client_id=").append(TEST_CLIENT_ID)
                 .append("&redirect_uri=").append(TEST_REDIRECT_URL);
         assertTrue(context.getProperty(REDIRECT_URL) != null && ((String)context.getProperty(REDIRECT_URL))
-                        .contains(partialExpectedRedirectUrlWithoutState.toString()),
-            "Redirect URL is not as expected");
+                .contains(partialExpectedRedirectUrlWithoutState.toString()), "Redirect URL is not as expected");
     }
-
 }

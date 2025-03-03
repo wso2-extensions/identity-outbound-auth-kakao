@@ -23,13 +23,7 @@ public class KakaoCustomAuthenticatorConstants {
     public static final String AUTHENTICATOR_NAME = "KAKAO";
     public static final String AUTHENTICATOR_I18N_KEY = "authenticator.kakao";
     public static final String AUTHENTICATOR_FRIENDLY_NAME = "KAKAO";
-    public static final String ACCESS_TOKEN_PARAM = "accessToken";
     public static final String AUTHENTICATOR_MESSAGE = "authenticatorMessage";
-    public static final String ID_TOKEN_PARAM = "idToken";
-    public static final String STATE = "state";
-    public static final String CLIENT_ID = "ClientId";
-    public static final String CLIENT_SECRET = "ClientSecret";
-    public static final String CALLBACK_URL = "CallbackUrl";
     public static final String REDIRECT_URL = "redirectUrl";
     public static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
     public static final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
@@ -39,6 +33,9 @@ public class KakaoCustomAuthenticatorConstants {
     private KakaoCustomAuthenticatorConstants() {
     }
 
+    /**
+     * Enum for error messages.
+     */
     public enum ErrorMessages {
 
         NO_REGISTERED_IDP_FOR_ISSUER("Kakao-65001", "No registered IdP found for the issuer: %s"),
