@@ -201,6 +201,9 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
             authenticatorData.setAdditionalData(getAdditionalData(context, false));
         }
         authenticatorData.setRequiredParams(requiredParameterList);
+        if (context.getProperty(AUTHENTICATOR_MESSAGE) != null) {
+            authenticatorData.setMessage((AuthenticatorMessage) context.getProperty(AUTHENTICATOR_MESSAGE));
+        }
 
         return Optional.of(authenticatorData);
     }
@@ -367,8 +370,7 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
                                                          AuthenticationContext context) {
 
         AuthenticatorMessage authenticatorMessage = new AuthenticatorMessage(FrameworkConstants.
-                AuthenticatorMessageType.ERROR, errorMessage.
-                getCode(), errorMessage.getMessage(), null);
+                AuthenticatorMessageType.ERROR, errorMessage.getCode(), errorMessage.getMessage(), null);
         context.setProperty(AUTHENTICATOR_MESSAGE, authenticatorMessage);
     }
 }
