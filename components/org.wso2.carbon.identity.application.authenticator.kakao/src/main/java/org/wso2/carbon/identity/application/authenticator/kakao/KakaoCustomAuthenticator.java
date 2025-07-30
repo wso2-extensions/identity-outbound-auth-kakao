@@ -22,22 +22,28 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.oltu.oauth2.common.utils.JSONUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.ExternalIdPConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.ApplicationAuthenticatorException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.MisconfigurationException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AdditionalData;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatorData;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatorMessage;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticator;
 import org.wso2.carbon.identity.application.authenticator.oauth2.Oauth2GenericAuthenticatorConstants;
 import org.wso2.carbon.identity.application.authenticator.oidc.util.OIDCTokenValidationUtil;
-import org.wso2.carbon.identity.application.common.model.IdentityProvider;
-import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
-import org.wso2.carbon.identity.application.common.model.Property;
+import org.wso2.carbon.identity.application.common.model.*;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
@@ -46,12 +52,9 @@ import org.wso2.carbon.idp.mgt.util.IdPManagementConstants;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.*;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.AUTHENTICATOR_I18N_KEY;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.AUTHENTICATOR_MESSAGE;
 import static org.wso2.carbon.identity.application.authenticator.kakao.KakaoCustomAuthenticatorConstants.KAKAO_AUTH_URL;
@@ -73,6 +76,7 @@ import static org.wso2.carbon.identity.application.authenticator.oidc.OIDCAuthen
 public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
 
     private static final long serialVersionUID = 6614257960044886319L;
+    private static final Log logger = LogFactory.getLog(Oauth2GenericAuthenticator.class);
 
     /**
      * Check whether the request can be handled by the authenticator.
@@ -89,19 +93,19 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
     @Override
     public String getFriendlyName() {
 
-        return KakaoCustomAuthenticatorConstants.AUTHENTICATOR_FRIENDLY_NAME;
+        return AUTHENTICATOR_FRIENDLY_NAME;
     }
 
     @Override
     public String getName() {
 
-        return KakaoCustomAuthenticatorConstants.AUTHENTICATOR_NAME;
+        return AUTHENTICATOR_NAME;
     }
 
     @Override
     protected String getTokenEndpoint(Map<String, String> authenticatorProperties) {
 
-        return KakaoCustomAuthenticatorConstants.KAKAO_TOKEN_URL;
+        return KAKAO_TOKEN_URL;
     }
 
     @Override
@@ -113,7 +117,50 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
     @Override
     protected String getUserInfoEndpoint(Map<String, String> authenticatorProperties) {
 
-        return KakaoCustomAuthenticatorConstants.KAKAO_INFO_URL;
+        return KAKAO_INFO_URL;
+    }
+
+    @Override
+    protected void buildClaims(AuthenticationContext context, String userInfoString)
+            throws ApplicationAuthenticatorException {
+        if (StringUtils.isNotBlank(userInfoString)) {
+            Map<String, Object> userInfoJson = JSONUtils.parseJSON(userInfoString);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Building user claims");
+            }
+            Map<ClaimMapping, String> claims = new HashMap();
+            Map<String, Object> flatten = flatten(userInfoJson);
+            for(Map.Entry<String, Object> entry : flatten.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value != null) {
+                    claims.put(ClaimMapping.build(key, key, (String) null, false), value.toString());
+                    if (logger.isDebugEnabled() && IdentityUtil.isTokenLoggable("UserClaims")) {
+                        logger.debug("Adding claim mapping : " + key + " <> " + key + " : " + value);
+                    }
+                }
+            }
+            ClaimConfig claimConfig = context.getExternalIdP().getIdentityProvider().getClaimConfig();
+            if (StringUtils.isBlank(claimConfig.getUserClaimURI())) {
+                if(flatten.containsKey(USER_ID)) {
+                    claimConfig.setUserClaimURI(USER_ID);
+                } else {
+                    claimConfig.setUserClaimURI("email");
+                }
+            }
+
+            String subjectFromClaims = FrameworkUtils.getFederatedSubjectFromClaims(context.getExternalIdP().getIdentityProvider(), claims);
+            if (!StringUtils.isBlank(subjectFromClaims)) {
+                AuthenticatedUser authenticatedUser = AuthenticatedUser.createFederateAuthenticatedUserFromSubjectIdentifier(subjectFromClaims);
+                context.setSubject(authenticatedUser);
+            } else {
+                this.setSubject(context, userInfoJson);
+            }
+
+            context.getSubject().setUserAttributes(claims);
+        } else {
+            throw new ApplicationAuthenticatorException("Decoded json object is null");
+        }
     }
 
     @Override
@@ -314,10 +361,10 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
 
             if (identityProvider == null) {
                 String msg = String.format(
-                        KakaoCustomAuthenticatorConstants.ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(), idpIdentifier);
+                        ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(), idpIdentifier);
                 AuthenticatorMessage authenticatorMessage = new AuthenticatorMessage(
                         FrameworkConstants.AuthenticatorMessageType.ERROR,
-                        KakaoCustomAuthenticatorConstants.ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(),
+                        ErrorMessages.NO_REGISTERED_IDP_FOR_ISSUER.getCode(),
                         msg,
                         null);
                 setAuthenticatorMessageToContext(authenticatorMessage, context);
@@ -327,8 +374,8 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
             OIDCTokenValidationUtil.validateSignature(signedJWT, identityProvider);
         } catch (ParseException | JOSEException | IdentityProviderManagementException | IdentityOAuth2Exception e) {
             setAuthenticatorMessageToContext(
-                    KakaoCustomAuthenticatorConstants.ErrorMessages.JWT_TOKEN_VALIDATION_FAILED, context);
-            throw new AuthenticationFailedException(KakaoCustomAuthenticatorConstants.ErrorMessages.
+                    ErrorMessages.JWT_TOKEN_VALIDATION_FAILED, context);
+            throw new AuthenticationFailedException(ErrorMessages.
                     JWT_TOKEN_VALIDATION_FAILED.getMessage(), e);
         }
     }
@@ -339,10 +386,10 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         Map<String, String> authenticatorProperties = context.getAuthenticatorProperties();
         String clientId = authenticatorProperties.get(CLIENT_ID);
         if (audience == null || !audience.contains(clientId)) {
-            setAuthenticatorMessageToContext(KakaoCustomAuthenticatorConstants.ErrorMessages
+            setAuthenticatorMessageToContext(ErrorMessages
                     .ID_TOKEN_AUD_VALIDATION_FAILED, context);
             throw new AuthenticationFailedException(
-                    KakaoCustomAuthenticatorConstants.ErrorMessages.ID_TOKEN_AUD_VALIDATION_FAILED.getMessage());
+                    ErrorMessages.ID_TOKEN_AUD_VALIDATION_FAILED.getMessage());
         }
     }
 
@@ -366,12 +413,41 @@ public class KakaoCustomAuthenticator extends Oauth2GenericAuthenticator {
         context.setProperty(AUTHENTICATOR_MESSAGE, message);
     }
 
-    private static void setAuthenticatorMessageToContext(KakaoCustomAuthenticatorConstants.ErrorMessages errorMessage,
+    private static void setAuthenticatorMessageToContext(ErrorMessages errorMessage,
                                                          AuthenticationContext context) {
 
         AuthenticatorMessage authenticatorMessage = new AuthenticatorMessage(FrameworkConstants.
                 AuthenticatorMessageType.ERROR, errorMessage.getCode(), errorMessage.getMessage(), null);
         context.setProperty(AUTHENTICATOR_MESSAGE, authenticatorMessage);
     }
-}
 
+    private static Map<String, Object> flatten(Map<String, Object> map) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        flatten("", map, result);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void flatten(String prefix, Object value, Map<String, Object> result) {
+        if (value instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) value;
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
+                flatten(key, entry.getValue(), result);
+            }
+        } else if (value instanceof JSONObject) {
+            JSONObject obj = (JSONObject) value;
+            for (Object k : obj.keySet()) {
+                String key = prefix.isEmpty() ? k.toString() : prefix + "." + k;
+                flatten(key, obj.get((String) k), result);
+            }
+        } else if (value instanceof JSONArray) {
+            JSONArray arr = (JSONArray) value;
+            for (int i = 0; i < arr.length(); i++) {
+                flatten(prefix + "[" + i + "]", arr.get(i), result);
+            }
+        } else {
+            result.put(prefix, value);
+        }
+    }
+}
