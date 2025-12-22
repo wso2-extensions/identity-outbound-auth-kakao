@@ -243,7 +243,7 @@
         <apache.commons.logging.version.range>[1.2,2)</apache.commons.logging.version.range>
         <osgi.framework.version.range>[1.8,2)</osgi.framework.version.range>
         <json.version.range>[3.0,4)</json.version.range>
-        <nimbusds.osgi.version.range>[10.3.0.wso2v1,11.0.0)</nimbusds.osgi.version.range>
+        <nimbusds.osgi.version.range>[10.3.0,11.0.0)</nimbusds.osgi.version.range>
         <jacoco.version>0.8.12</jacoco.version>
         <nimbusds.version>10.3.0.wso2v1</nimbusds.version>
         <carbon.identity.package.export.project.version>${project.version}
